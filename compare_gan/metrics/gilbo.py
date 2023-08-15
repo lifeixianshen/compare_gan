@@ -93,8 +93,7 @@ def _build_regressor(x, z_dim=64):
   b = 1 + tf.nn.softplus(b - 5)
   dist = ds.Independent(ds.Beta(a, b), 1)
   bijector = ds.bijectors.Affine(-1.0, 2.0)
-  tdist = ds.TransformedDistribution(distribution=dist, bijector=bijector)
-  return tdist
+  return ds.TransformedDistribution(distribution=dist, bijector=bijector)
 
 
 def train_gilbo(gan, sess, outdir, checkpoint_path, dataset, options):
@@ -456,8 +455,7 @@ def _run_gilbo_consistency(
       consistency_rkl=np.reshape(consistency_rkls, [-1, gan.batch_size]),
       consistency_skl=np.reshape(consistency_skls, [-1, gan.batch_size]),
   )
-  with tf.gfile.Open(
-      os.path.join(outdir, "%s_consistency_dists.p" % mode), "w") as f:
+  with tf.gfile.Open(os.path.join(outdir, f"{mode}_consistency_dists.p"), "w") as f:
     pickle.dump(out_dists, f)
 
   return np.mean(consistency_skls)
@@ -488,7 +486,7 @@ def _save_z_histograms(gan, z_sample, z_pred_dist, outdir, step):
       axs.flat[j].vlines(samp[pk, j], 0, 1.0, linestyle="dashed")
     plt.tight_layout()
     filename = os.path.join(outdir, "z_hist_%03d.png" % step)
-    tf.logging.info("Saving z histogram: %s" % filename)
+    tf.logging.info(f"Saving z histogram: {filename}")
     with tf.gfile.Open(filename, "w") as f:
       fig.savefig(f, dpi="figure")
   except Exception as e:  # pylint: disable=broad-except

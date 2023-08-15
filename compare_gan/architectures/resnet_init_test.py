@@ -41,7 +41,7 @@ class ResNetInitTest(tf.test.TestCase):
         "beta/Initializer/zeros",
         "gamma/Initializer/ones",
     ]
-    valid_op_names = "/({}):0$".format("|".join(valid_initalizer))
+    valid_op_names = f'/({"|".join(valid_initalizer)}):0$'
     with tf.Graph().as_default():
       z = tf.zeros((2, 128))
       fake_image = resnet5.Generator(image_shape=(128, 128, 3))(
@@ -61,7 +61,7 @@ class ResNetInitTest(tf.test.TestCase):
         "beta/Initializer/zeros",
         "gamma/Initializer/ones",
     ]
-    valid_op_names = "/({}):0$".format("|".join(valid_initalizer))
+    valid_op_names = f'/({"|".join(valid_initalizer)}):0$'
     with tf.Graph().as_default():
       z = tf.zeros((2, 128))
       fake_image = resnet5.Generator(image_shape=(128, 128, 3))(
@@ -81,7 +81,7 @@ class ResNetInitTest(tf.test.TestCase):
         "beta/Initializer/zeros",
         "gamma/Initializer/ones",
     ]
-    valid_op_names = "/({}):0$".format("|".join(valid_initalizer))
+    valid_op_names = f'/({"|".join(valid_initalizer)}):0$'
     with tf.Graph().as_default():
       z = tf.zeros((2, 128))
       fake_image = resnet5.Generator(image_shape=(128, 128, 3))(
@@ -101,7 +101,7 @@ class ResNetInitTest(tf.test.TestCase):
         "beta/Initializer/zeros",
         "gamma/Initializer/ones",
     ]
-    valid_op_names = "/({}):0$".format("|".join(valid_initalizer))
+    valid_op_names = f'/({"|".join(valid_initalizer)}):0$'
     with tf.Graph().as_default():
       z = tf.zeros((2, 128))
       fake_image = resnet5.Generator(image_shape=(128, 128, 3))(

@@ -214,9 +214,9 @@ class S3GAN(modular_gan.ModularGAN):
     real_images = features["images"]
     if self.conditional:
       if self._use_soft_labels:
-        assert labels.shape[1] == self._dataset.num_classes, \
-            ("Need soft labels of dimension {} but got dimension {}".format(
-                self._dataset.num_classes, labels.shape[1]))
+        assert (
+            labels.shape[1] == self._dataset.num_classes
+        ), f"Need soft labels of dimension {self._dataset.num_classes} but got dimension {labels.shape[1]}"
         real_labels = labels
       else:
         real_labels = self._get_one_hot_labels(labels)

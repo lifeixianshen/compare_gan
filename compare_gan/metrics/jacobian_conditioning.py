@@ -52,10 +52,11 @@ class GeneratorConditionNumberTask(eval_task.EvalTask):
 
   def run_in_session(self, options, sess, gan, real_images):
     del options, real_images
-    result_dict = {}
     result = compute_generator_condition_number(sess, gan)
-    result_dict[self._CONDITION_NUMBER_COUNT] = len(result)
-    result_dict[self._CONDITION_NUMBER_MEAN] = np.mean(result)
+    result_dict = {
+        self._CONDITION_NUMBER_COUNT: len(result),
+        self._CONDITION_NUMBER_MEAN: np.mean(result),
+    }
     result_dict[self._CONDITION_NUMBER_STD] = np.std(result)
     return result_dict
 

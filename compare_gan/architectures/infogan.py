@@ -58,8 +58,7 @@ class Generator(abstract_arch.AbstractGenerator):
     net = deconv2d(net, [bs, h // 2, w // 2, 64], 4, 4, 2, 2, name="g_dc3")
     net = lrelu(batch_norm(net, is_training=is_training, name="g_bn3"))
     net = deconv2d(net, [bs, h, w, c], 4, 4, 2, 2, name="g_dc4")
-    out = tf.nn.sigmoid(net)
-    return out
+    return tf.nn.sigmoid(net)
 
 
 class Discriminator(abstract_arch.AbstractDiscriminator):

@@ -86,16 +86,20 @@ def compute_msssim(generated_images, num_batches):
   # Generate all possible image pairs from input set of imgs.
   pair1 = tf.tile(generated_images, [batch_size, 1, 1, 1])
   pair2 = tf.reshape(
-      tf.tile(generated_images, [1, batch_size, 1, 1]), [
-          batch_size * batch_size, generated_images.shape[1],
-          generated_images.shape[2], generated_images.shape[3]
-      ])
+      tf.tile(generated_images, [1, batch_size, 1, 1]),
+      [
+          batch_size**2,
+          generated_images.shape[1],
+          generated_images.shape[2],
+          generated_images.shape[3],
+      ],
+  )
 
   # Compute the mean of the scores (but ignore the 'identical' images - which
   # should get 1.0 from the MultiscaleSSIM)
   score = tf.reduce_sum(image_similarity.multiscale_ssim(pair1, pair2))
   score -= batch_size
-  score = tf.div(score, batch_size * batch_size - batch_size)
+  score = tf.div(score, batch_size**2 - batch_size)
 
   # Define a function which wraps some session.run calls to generate a large
   # number of images and compute multiscale ssim metric on them.
@@ -108,4 +112,5 @@ def compute_msssim(generated_images, num_batches):
 
     result = np.mean(scores)
     return result
+
   return _eval_fn

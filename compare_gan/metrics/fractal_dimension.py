@@ -91,7 +91,7 @@ def compute_fractal_dimension(fake_images,
   start = np.argmax(y > y_val - scale * y_width)
   end = np.argmax(y > y_val + scale * y_width)
 
-  slope = np.linalg.lstsq(
+  return np.linalg.lstsq(
       a=np.vstack([x[start:end], np.ones(end - start)]).transpose(),
-      b=y[start:end].reshape(end - start, 1))[0][0][0]
-  return slope
+      b=y[start:end].reshape(end - start, 1),
+  )[0][0][0]

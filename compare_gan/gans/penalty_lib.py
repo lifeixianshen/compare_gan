@@ -52,8 +52,7 @@ def dragan_penalty(discriminator, x, y, is_training):
     gradients = tf.gradients(logits, [x_noisy])[0]
     slopes = tf.sqrt(0.0001 + tf.reduce_sum(
         tf.square(gradients), reduction_indices=[1, 2, 3]))
-    gradient_penalty = tf.reduce_mean(tf.square(slopes - 1.0))
-    return gradient_penalty
+    return tf.reduce_mean(tf.square(slopes - 1.0))
 
 
 @gin.configurable(whitelist=[])
@@ -78,8 +77,7 @@ def wgangp_penalty(discriminator, x, x_fake, y, is_training):
     gradients = tf.gradients(logits, [interpolates])[0]
     slopes = tf.sqrt(0.0001 + tf.reduce_sum(
         tf.square(gradients), reduction_indices=[1, 2, 3]))
-    gradient_penalty = tf.reduce_mean(tf.square(slopes - 1.0))
-    return gradient_penalty
+    return tf.reduce_mean(tf.square(slopes - 1.0))
 
 
 @gin.configurable(whitelist=[])
