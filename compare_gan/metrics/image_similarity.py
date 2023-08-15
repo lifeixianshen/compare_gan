@@ -64,15 +64,15 @@ def verify_compatible_shapes(img1, img2):
   if shape1.ndims is not None and shape2.ndims is not None:
     for dim1, dim2 in zip(reversed(shape1[:-3]), reversed(shape2[:-3])):
       if not (dim1 == 1 or dim2 == 1 or dim1.is_compatible_with(dim2)):
-        raise ValueError(
-            'Two images are not compatible: %s and %s' % (shape1, shape2))
+        raise ValueError(f'Two images are not compatible: {shape1} and {shape2}')
 
   # Now assign shape tensors.
   shape1, shape2 = tf.shape_n([img1, img2])
 
-  checks = []
-  checks.append(tf.Assert(tf.greater_equal(tf.size(shape1), 3),
-                          [shape1, shape2], summarize=10))
+  checks = [
+      tf.Assert(tf.greater_equal(tf.size(shape1), 3), [shape1, shape2],
+                summarize=10)
+  ]
   checks.append(tf.Assert(tf.reduce_all(tf.equal(shape1[-3:], shape2[-3:])),
                           [shape1, shape2], summarize=10))
   return shape1, shape2, checks

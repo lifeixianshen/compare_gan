@@ -53,10 +53,11 @@ class Generator(resnet_ops.ResNetGenerator):
     output = tf.reshape(output, [batch_size, 6, 6, 512], name="fc_reshaped")
     for block_idx in range(3):
       block = self._resnet_block(
-          name="B{}".format(block_idx + 1),
+          name=f"B{block_idx + 1}",
           in_channels=ch * magic[block_idx][0],
           out_channels=ch * magic[block_idx][1],
-          scale="up")
+          scale="up",
+      )
       output = block(output, z=z, y=y, is_training=is_training)
     output = self.batch_norm(
         output, z=z, y=y, is_training=is_training, scope="final_norm")
@@ -87,7 +88,7 @@ class Discriminator(resnet_ops.ResNetDiscriminator):
     resnet_ops.validate_image_inputs(x, validate_power2=False)
     colors = x.shape[-1].value
     if colors not in [1, 3]:
-      raise ValueError("Number of color channels unknown: %s" % colors)
+      raise ValueError(f"Number of color channels unknown: {colors}")
     ch = 64
     block = self._resnet_block(
         name="B0", in_channels=colors, out_channels=ch, scale="down")
@@ -95,10 +96,11 @@ class Discriminator(resnet_ops.ResNetDiscriminator):
     magic = [(1, 2), (2, 4), (4, 8), (8, 16)]
     for block_idx in range(4):
       block = self._resnet_block(
-          name="B{}".format(block_idx + 1),
+          name=f"B{block_idx + 1}",
           in_channels=ch * magic[block_idx][0],
           out_channels=ch * magic[block_idx][1],
-          scale="down" if block_idx < 3 else "none")
+          scale="down" if block_idx < 3 else "none",
+      )
       output = block(output, z=None, y=y, is_training=is_training)
     output = tf.nn.relu(output)
     pre_logits = tf.reduce_mean(output, axis=[1, 2])

@@ -69,9 +69,9 @@ def compute_prd(eval_dist, ref_dist, num_angles=1001, epsilon=1e-10):
     ValueError: If num_angles < 3.
   """
 
-  if not (epsilon > 0 and epsilon < 0.1):
-    raise ValueError('epsilon must be in (0, 0.1] but is %s.' % str(epsilon))
-  if not (num_angles >= 3 and num_angles <= 1e6):
+  if epsilon <= 0 or epsilon >= 0.1:
+    raise ValueError(f'epsilon must be in (0, 0.1] but is {str(epsilon)}.')
+  if num_angles < 3 or num_angles > 1e6:
     raise ValueError('num_angles must be in [3, 1e6] but is %d.' % num_angles)
 
   # Compute slopes for linearly spaced angles between [0, pi/2]
@@ -207,7 +207,7 @@ def _prd_to_f_beta(precision, recall, beta=1, epsilon=1e-10):
   if not ((recall >= 0).all() and (recall <= 1).all()):
     raise ValueError('All values in recall must be in [0, 1].')
   if beta <= 0:
-    raise ValueError('Given parameter beta %s must be positive.' % str(beta))
+    raise ValueError(f'Given parameter beta {str(beta)} must be positive.')
 
   return (1 + beta**2) * (precision * recall) / (
       (beta**2 * precision) + recall + epsilon)
@@ -241,7 +241,7 @@ def prd_to_max_f_beta_pair(precision, recall, beta=8):
   if not ((recall >= 0).all() and (recall <= 1).all()):
     raise ValueError('All values in recall must be in [0, 1].')
   if beta <= 0:
-    raise ValueError('Given parameter beta %s must be positive.' % str(beta))
+    raise ValueError(f'Given parameter beta {str(beta)} must be positive.')
 
   f_beta = np.max(_prd_to_f_beta(precision, recall, beta))
   f_beta_inv = np.max(_prd_to_f_beta(precision, recall, 1/beta))

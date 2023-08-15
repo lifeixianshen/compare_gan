@@ -133,8 +133,8 @@ class BigGanDeepResNetBlock(object):
     """
     if inputs.shape[-1].value != self._in_channels:
       raise ValueError(
-          "Unexpected number of input channels (expected {}, got {}).".format(
-              self._in_channels, inputs.shape[-1].value))
+          f"Unexpected number of input channels (expected {self._in_channels}, got {inputs.shape[-1].value})."
+      )
 
     bottleneck_channels = max(self._in_channels, self._out_channels) // 4
     bn = functools.partial(self.batch_norm, z=z, y=y, is_training=is_training)
@@ -208,8 +208,7 @@ class Generator(abstract_arch.AbstractGenerator):
   def _resnet_block(self, name, in_channels, out_channels, scale):
     """ResNet block for the generator."""
     if scale not in ["up", "none"]:
-      raise ValueError(
-          "Unknown generator ResNet block scaling: {}.".format(scale))
+      raise ValueError(f"Unknown generator ResNet block scaling: {scale}.")
     return BigGanDeepResNetBlock(
         name=name,
         in_channels=in_channels,
@@ -232,7 +231,7 @@ class Generator(abstract_arch.AbstractGenerator):
     elif resolution == 32:
       channel_multipliers = 8 * [4]
     else:
-      raise ValueError("Unsupported resolution: {}".format(resolution))
+      raise ValueError(f"Unsupported resolution: {resolution}")
     in_channels = [self._ch * c for c in channel_multipliers[:-1]]
     out_channels = [self._ch * c for c in channel_multipliers[1:]]
     return in_channels, out_channels
@@ -278,10 +277,11 @@ class Generator(abstract_arch.AbstractGenerator):
     for block_idx in range(num_blocks):
       scale = "none" if block_idx % 2 == 0 else "up"
       block = self._resnet_block(
-          name="B{}".format(block_idx + 1),
+          name=f"B{block_idx + 1}",
           in_channels=in_channels[block_idx],
           out_channels=out_channels[block_idx],
-          scale=scale)
+          scale=scale,
+      )
       net = block(net, z=z, y=y, is_training=is_training)
       # At resolution 64x64 there is a self-attention block.
       if scale == "up" and net.shape[1].value == 64:
@@ -335,8 +335,7 @@ class Discriminator(abstract_arch.AbstractDiscriminator):
   def _resnet_block(self, name, in_channels, out_channels, scale):
     """ResNet block for the generator."""
     if scale not in ["down", "none"]:
-      raise ValueError(
-          "Unknown discriminator ResNet block scaling: {}.".format(scale))
+      raise ValueError(f"Unknown discriminator ResNet block scaling: {scale}.")
     return BigGanDeepResNetBlock(
         name=name,
         in_channels=in_channels,
@@ -348,7 +347,7 @@ class Discriminator(abstract_arch.AbstractDiscriminator):
   def _get_in_out_channels(self, colors, resolution):
     # See Table 7-9.
     if colors not in [1, 3]:
-      raise ValueError("Unsupported color channels: {}".format(colors))
+      raise ValueError(f"Unsupported color channels: {colors}")
     if resolution == 512:
       channel_multipliers = [1, 1, 1, 2, 2, 4, 4] + 4 * [8] + 4 * [16]
     elif resolution == 256:
@@ -360,7 +359,7 @@ class Discriminator(abstract_arch.AbstractDiscriminator):
     elif resolution == 32:
       channel_multipliers = 8 * [2]
     else:
-      raise ValueError("Unsupported resolution: {}".format(resolution))
+      raise ValueError(f"Unsupported resolution: {resolution}")
     in_channels = [self._ch * c for c in channel_multipliers[:-1]]
     out_channels = [self._ch * c for c in channel_multipliers[1:]]
     return in_channels, out_channels
@@ -395,10 +394,11 @@ class Discriminator(abstract_arch.AbstractDiscriminator):
     for block_idx in range(num_blocks):
       scale = "down" if block_idx % 2 == 0 else "none"
       block = self._resnet_block(
-          name="B{}".format(block_idx + 1),
+          name=f"B{block_idx + 1}",
           in_channels=in_channels[block_idx],
           out_channels=out_channels[block_idx],
-          scale=scale)
+          scale=scale,
+      )
       net = block(net, z=None, y=y, is_training=is_training)
       # At resolution 64x64 there is a self-attention block.
       if scale == "none" and net.shape[1].value == 64:

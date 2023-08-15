@@ -38,9 +38,9 @@ def check_dimensions(d_real, d_fake, d_real_logits, d_fake_logits):
   """
   def _check_pair(a, b):
     if a != b:
-      raise ValueError("Shape mismatch: %s vs %s." % (a, b))
+      raise ValueError(f"Shape mismatch: {a} vs {b}.")
     if len(a) != 2 or len(b) != 2:
-      raise ValueError("Rank: expected 2, got %s and %s" % (len(a), len(b)))
+      raise ValueError(f"Rank: expected 2, got {len(a)} and {len(b)}")
 
   if (d_real is not None) and (d_fake is not None):
     _check_pair(d_real.shape.as_list(), d_fake.shape.as_list())

@@ -63,8 +63,8 @@ def _parse_gin_config(config_path):
   config = {}
   for statement in parser:
     if not isinstance(statement, gin.config_parser.ImportStatement):
-      name = statement.scope + "/" if statement.scope else ""
-      name = statement.selector + "." + statement.arg_name
+      name = f"{statement.scope}/" if statement.scope else ""
+      name = f"{statement.selector}.{statement.arg_name}"
       config[name] = statement.value
   return config
 
@@ -151,8 +151,7 @@ class TaskManager(object):
     last_eval = time.time()
     while True:
       unevaluated_checkpoints = []
-      checkpoint_state = tf.train.get_checkpoint_state(self.model_dir)
-      if checkpoint_state:
+      if checkpoint_state := tf.train.get_checkpoint_state(self.model_dir):
         checkpoints = set(checkpoint_state.all_model_checkpoint_paths)
         # Remove already evaluated checkpoints and sort ascending by step
         # number.
@@ -167,8 +166,7 @@ class TaskManager(object):
             "Found checkpoints: %s\nEvaluated checkpoints: %s\n"
             "Unevaluated checkpoints: %s", checkpoints, evaluated_checkpoints,
             unevaluated_checkpoints)
-      for checkpoint_path in unevaluated_checkpoints:
-        yield checkpoint_path
+      yield from unevaluated_checkpoints
       if unevaluated_checkpoints:
         evaluated_checkpoints |= set(unevaluated_checkpoints)
         last_eval = time.time()
@@ -200,8 +198,8 @@ class TaskManagerWithCsvResults(TaskManager):
     config_steps = [get_step(fn) for fn in saved_configs]
     assert config_steps
     last_config_step = sorted([s for s in config_steps if s <= step])[-1]
-    config_path = os.path.join(
-        self.model_dir, "operative_config-{}.gin".format(last_config_step))
+    config_path = os.path.join(self.model_dir,
+                               f"operative_config-{last_config_step}.gin")
     return _parse_gin_config(config_path)
 
   def add_eval_result(self, checkpoint_path, result_dict, default_value):
@@ -313,7 +311,7 @@ def run_with_schedule(schedule, run_config, task_manager, options, use_tpu,
                              model_dir=run_config.model_dir)
 
   if schedule not in {"train", "eval_after_train", "continuous_eval"}:
-    raise ValueError("Schedule {} not supported.".format(schedule))
+    raise ValueError(f"Schedule {schedule} not supported.")
   if schedule in {"train", "eval_after_train"}:
     train_hooks = [
         gin.tf.GinConfigSaverHook(run_config.model_dir),

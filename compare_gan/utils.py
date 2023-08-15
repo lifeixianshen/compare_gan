@@ -152,9 +152,7 @@ def get_parameter_overview(variables, limit=40):
         "{:,}".format(v.get_shape().num_elements()), max_size_len,
         v.dtype.base_dtype.name, max_type_len))
 
-  lines.append(separator)
-  lines.append("Total: {:,}".format(total_weights))
-
+  lines.extend((separator, "Total: {:,}".format(total_weights)))
   return "\n".join(lines)
 
 

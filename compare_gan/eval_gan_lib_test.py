@@ -91,7 +91,7 @@ class EvalGanLibTest(parameterized.TestCase, tf.test.TestCase):
         "lambda": 1,
     }
     model_dir = os.path.join(tf.test.get_temp_dir(), self.id())
-    tf.logging.info("model_dir: %s" % model_dir)
+    tf.logging.info(f"model_dir: {model_dir}")
     run_config = tf.contrib.tpu.RunConfig(model_dir=model_dir)
     gan = ModularGAN(dataset=dataset,
                      parameters=options,
@@ -116,8 +116,8 @@ class EvalGanLibTest(parameterized.TestCase, tf.test.TestCase):
     for score in ["fid_score", "fractal_dimension", "inception_score",
                   "ms_ssim"]:
       for stats in ["mean", "std", "list"]:
-        required_key = "%s_%s" % (score, stats)
-        self.assertIn(required_key, result_dict, "Missing: %s." % required_key)
+        required_key = f"{score}_{stats}"
+        self.assertIn(required_key, result_dict, f"Missing: {required_key}.")
 
 
 if __name__ == "__main__":

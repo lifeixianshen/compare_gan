@@ -124,9 +124,7 @@ class ImageDatasetV2(object):
   @property
   def eval_test_samples(self):
     """Number of examples in the "test" split of this dataset."""
-    if FLAGS.data_fake_dataset:
-      return 100
-    return self._eval_test_sample
+    return 100 if FLAGS.data_fake_dataset else self._eval_test_sample
 
   @property
   def image_shape(self):
@@ -470,7 +468,7 @@ def _transform_imagnet_image(image, target_image_shape, crop_method, seed):
     begin = tf.concat([begin, [0]], axis=0)  # Add channel dimension.
     image = tf.slice(image, begin, [size, size, 3])
   elif crop_method != "none":
-    raise ValueError("Unsupported crop method: {}".format(crop_method))
+    raise ValueError(f"Unsupported crop method: {crop_method}")
   image = tf.image.resize_images(
       image, [target_image_shape[0], target_image_shape[1]])
   image.set_shape(target_image_shape)
@@ -502,15 +500,16 @@ class ImagenetDataset(ImageDatasetV2):
 
   def __init__(self, resolution, seed, filter_unlabeled=False):
     if resolution not in [64, 128, 256, 512]:
-      raise ValueError("Unsupported resolution: {}".format(resolution))
+      raise ValueError(f"Unsupported resolution: {resolution}")
     super(ImagenetDataset, self).__init__(
-        name="imagenet_{}".format(resolution),
+        name=f"imagenet_{resolution}",
         tfds_name="imagenet2012",
         resolution=resolution,
         colors=3,
         num_classes=1000,
         eval_test_samples=50000,
-        seed=seed)
+        seed=seed,
+    )
     self._eval_split = tfds.Split.VALIDATION
     self._filter_unlabeled = filter_unlabeled
 
@@ -539,7 +538,7 @@ class SizeFilteredImagenetDataset(ImagenetDataset):
     super(SizeFilteredImagenetDataset, self).__init__(
         resolution=resolution,
         seed=seed)
-    self._name = "imagenet_{}_hq{}".format(resolution, threshold)
+    self._name = f"imagenet_{resolution}_hq{threshold}"
     self._threshold = threshold
 
   def _train_filter_fn(self, image, label):
@@ -559,7 +558,7 @@ class SingleClassImagenetDataset(ImagenetDataset):
     super(SingleClassImagenetDataset, self).__init__(
         resolution=resolution,
         seed=seed)
-    self._name = "single_class_" + self._name
+    self._name = f"single_class_{self._name}"
     self._num_classes = 1
 
   def _parse_fn(self, features):
@@ -575,7 +574,7 @@ class RandomClassImagenetDataset(ImagenetDataset):
     super(RandomClassImagenetDataset, self).__init__(
         resolution=resolution,
         seed=seed)
-    self._name = "random_class_" + self._name
+    self._name = f"random_class_{self._name}"
     self._num_classes = 1000
 
   def _parse_fn(self, features):
@@ -591,7 +590,7 @@ class SoftLabeledImagenetDataset(ImagenetDataset):
     super(SoftLabeledImagenetDataset, self).__init__(
         resolution=resolution,
         seed=seed)
-    self._name = "soft_labeled_" + self._name
+    self._name = f"soft_labeled_{self._name}"
 
   def _replace_label(self, feature_dict, new_unparsed_label):
     """Replaces the label from the feature_dict with the new (soft) label.
@@ -644,5 +643,5 @@ DATASETS = {
 def get_dataset(name, seed=547):
   """Instantiates a data set and sets the random seed."""
   if name not in DATASETS:
-    raise ValueError("Dataset %s is not available." % name)
+    raise ValueError(f"Dataset {name} is not available.")
   return DATASETS[name](seed=seed)

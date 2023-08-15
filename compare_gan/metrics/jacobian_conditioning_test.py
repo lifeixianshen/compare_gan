@@ -45,8 +45,7 @@ def SlowJacobian(xs, fx):
   fxs = tf.unstack(fx, axis=-1)
   grads = [tf.gradients(fx_i, xs) for fx_i in fxs]
   grads = [grad[0] for grad in grads]
-  df_dx = tf.stack(grads, axis=1)
-  return df_dx
+  return tf.stack(grads, axis=1)
 
 
 class JacobianConditioningTest(tf.test.TestCase):
@@ -90,15 +89,15 @@ class JacobianConditioningTest(tf.test.TestCase):
       x_np = sess.run(x)
       jacobian = sess.run(j_tensor, feed_dict={x: x_np})
 
+      # Test with finite differences.
+      epsilon = 1e-4
+
       # Test 10 random elements.
       for _ in range(10):
         # Pick a random element of Jacobian to test.
         batch_idx = np.random.randint(_BATCH_SIZE)
         x_idx = np.random.randint(2)
         f_idx = np.random.randint(10)
-
-        # Test with finite differences.
-        epsilon = 1e-4
 
         x_plus = x_np.copy()
         x_plus[batch_idx, x_idx] += epsilon

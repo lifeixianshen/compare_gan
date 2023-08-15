@@ -115,8 +115,7 @@ class ResNetBlock(object):
     if inputs.get_shape().as_list()[-1] != in_channels:
       raise ValueError("Unexpected number of input channels.")
     if scale not in ["up", "down", "none"]:
-      raise ValueError(
-          "Scale: got {}, expected 'up', 'down', or 'none'.".format(scale))
+      raise ValueError(f"Scale: got {scale}, expected 'up', 'down', or 'none'.")
 
     outputs = inputs
     if scale == "up":
@@ -124,13 +123,19 @@ class ResNetBlock(object):
     outputs = ops.conv2d(
         outputs,
         output_dim=out_channels,
-        k_h=kernel_size[0], k_w=kernel_size[1],
-        d_h=strides[0], d_w=strides[1],
+        k_h=kernel_size[0],
+        k_w=kernel_size[1],
+        d_h=strides[0],
+        d_w=strides[1],
         use_sn=self._spectral_norm,
-        name="{}_{}".format("same" if scale == "none" else scale, suffix))
+        name=f'{"same" if scale == "none" else scale}_{suffix}',
+    )
     if scale == "down":
-      outputs = tf.nn.pool(outputs, [2, 2], "AVG", "SAME", strides=[2, 2],
-                           name="pool_%s" % suffix)
+      outputs = tf.nn.pool(outputs, [2, 2],
+                           "AVG",
+                           "SAME",
+                           strides=[2, 2],
+                           name=f"pool_{suffix}")
     return outputs
 
   def apply(self, inputs, z, y, is_training):
@@ -188,8 +193,7 @@ class ResNetGenerator(abstract_arch.AbstractGenerator):
   def _resnet_block(self, name, in_channels, out_channels, scale):
     """ResNet block for the generator."""
     if scale not in ["up", "none"]:
-      raise ValueError(
-          "Unknown generator ResNet block scaling: {}.".format(scale))
+      raise ValueError(f"Unknown generator ResNet block scaling: {scale}.")
     return ResNetBlock(
         name=name,
         in_channels=in_channels,
@@ -206,8 +210,7 @@ class ResNetDiscriminator(abstract_arch.AbstractDiscriminator):
   def _resnet_block(self, name, in_channels, out_channels, scale):
     """ResNet block for the generator."""
     if scale not in ["down", "none"]:
-      raise ValueError(
-          "Unknown discriminator ResNet block scaling: {}.".format(scale))
+      raise ValueError(f"Unknown discriminator ResNet block scaling: {scale}.")
     return ResNetBlock(
         name=name,
         in_channels=in_channels,

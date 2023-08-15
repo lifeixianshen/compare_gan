@@ -112,8 +112,8 @@ class BigGanResNetBlock(resnet_ops.ResNetBlock):
     """
     if inputs.shape[-1].value != self._in_channels:
       raise ValueError(
-          "Unexpected number of input channels (expected {}, got {}).".format(
-              self._in_channels, inputs.shape[-1].value))
+          f"Unexpected number of input channels (expected {self._in_channels}, got {inputs.shape[-1].value})."
+      )
 
     with tf.variable_scope(self._name, values=[inputs]):
       outputs = inputs
@@ -191,8 +191,7 @@ class Generator(abstract_arch.AbstractGenerator):
   def _resnet_block(self, name, in_channels, out_channels, scale):
     """ResNet block for the generator."""
     if scale not in ["up", "none"]:
-      raise ValueError(
-          "Unknown generator ResNet block scaling: {}.".format(scale))
+      raise ValueError(f"Unknown generator ResNet block scaling: {scale}.")
     return BigGanResNetBlock(
         name=name,
         in_channels=in_channels,
@@ -215,7 +214,7 @@ class Generator(abstract_arch.AbstractGenerator):
     elif resolution == 32:
       channel_multipliers = [4, 4, 4, 4]
     else:
-      raise ValueError("Unsupported resolution: {}".format(resolution))
+      raise ValueError(f"Unsupported resolution: {resolution}")
     in_channels = [self._ch * c for c in channel_multipliers[:-1]]
     out_channels = [self._ch * c for c in channel_multipliers[1:]]
     return in_channels, out_channels
@@ -274,7 +273,7 @@ class Generator(abstract_arch.AbstractGenerator):
         name="fc_reshaped")
 
     for block_idx in range(num_blocks):
-      name = "B{}".format(block_idx + 1)
+      name = f"B{block_idx + 1}"
       block = self._resnet_block(
           name=name,
           in_channels=in_channels[block_idx],
@@ -328,8 +327,7 @@ class Discriminator(abstract_arch.AbstractDiscriminator):
   def _resnet_block(self, name, in_channels, out_channels, scale):
     """ResNet block for the generator."""
     if scale not in ["down", "none"]:
-      raise ValueError(
-          "Unknown discriminator ResNet block scaling: {}.".format(scale))
+      raise ValueError(f"Unknown discriminator ResNet block scaling: {scale}.")
     return BigGanResNetBlock(
         name=name,
         in_channels=in_channels,
@@ -343,7 +341,7 @@ class Discriminator(abstract_arch.AbstractDiscriminator):
 
   def _get_in_out_channels(self, colors, resolution):
     if colors not in [1, 3]:
-      raise ValueError("Unsupported color channels: {}".format(colors))
+      raise ValueError(f"Unsupported color channels: {colors}")
     if resolution == 512:
       channel_multipliers = [1, 1, 2, 4, 8, 8, 16, 16]
     elif resolution == 256:
@@ -355,7 +353,7 @@ class Discriminator(abstract_arch.AbstractDiscriminator):
     elif resolution == 32:
       channel_multipliers = [2, 2, 2, 2]
     else:
-      raise ValueError("Unsupported resolution: {}".format(resolution))
+      raise ValueError(f"Unsupported resolution: {resolution}")
     out_channels = [self._ch * c for c in channel_multipliers]
     in_channels = [colors] + out_channels[:-1]
     return in_channels, out_channels
@@ -385,7 +383,7 @@ class Discriminator(abstract_arch.AbstractDiscriminator):
 
     net = x
     for block_idx in range(num_blocks):
-      name = "B{}".format(block_idx + 1)
+      name = f"B{block_idx + 1}"
       is_last_block = block_idx == num_blocks - 1
       block = self._resnet_block(
           name=name,

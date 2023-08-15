@@ -203,9 +203,9 @@ def evaluate_tfhub_module(module_spec, eval_tasks, use_tpu,
       scores_for_key = np.array([d[key] for d in task_results_dicts])
       mean, std = np.mean(scores_for_key), np.std(scores_for_key)
       scores_as_string = "_".join([str(x) for x in scores_for_key])
-      result_statistics[key + "_mean"] = mean
-      result_statistics[key + "_std"] = std
-      result_statistics[key + "_list"] = scores_as_string
+      result_statistics[f"{key}_mean"] = mean
+      result_statistics[f"{key}_std"] = std
+      result_statistics[f"{key}_list"] = scores_as_string
     logging.info("Computed results for task %s: %s", task, result_statistics)
 
     result_dict.update(result_statistics)

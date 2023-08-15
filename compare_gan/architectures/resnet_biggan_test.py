@@ -49,26 +49,23 @@ def guess_initializer(var, graph=None):
   """
   if graph is None:
     graph = tf.get_default_graph()
-  prefix = var.op.name + "/Initializer"
+  prefix = f"{var.op.name}/Initializer"
   ops = [op for op in graph.get_operations()
          if op.name.startswith(prefix)]
-  assert ops, "No operations found for prefix {}".format(prefix)
+  assert ops, f"No operations found for prefix {prefix}"
   op_names = [op.name[len(prefix) + 1:] for op in ops]
   if len(op_names) == 1:
     if op_names[0] == "Const":
       value = ops[0].get_attr("value").float_val[0]
       if value == 0.0:
         return "zeros"
-      if np.isclose(value, 1.0):
-        return "ones"
-      return "constant"
+      return "ones" if np.isclose(value, 1.0) else "constant"
     return op_names[0]  # ones or zeros
   if "Qr" in op_names and "DiagPart" in op_names:
     return "orthogonal"
   if "random_uniform" in op_names:
     return "glorot_uniform"
-  stddev_ops = [op for op in ops if op.name.endswith("stddev")]
-  if stddev_ops:
+  if stddev_ops := [op for op in ops if op.name.endswith("stddev")]:
     assert len(stddev_ops) == 1
     stddev = stddev_ops[0].get_attr("value").float_val[0]
   else:
@@ -76,9 +73,7 @@ def guess_initializer(var, graph=None):
   if "random_normal" in op_names:
     return "random_normal"
   if "truncated_normal" in op_names:
-    if len(str(stddev)) > 5:
-      return "glorot_normal"
-    return "truncated_normal"
+    return "glorot_normal" if len(str(stddev)) > 5 else "truncated_normal"
 
 
 class ResNet5BigGanTest(tf.test.TestCase):
@@ -135,7 +130,7 @@ class ResNet5BigGanTest(tf.test.TestCase):
         # Shortcut connections use 1x1 convolution.
         if layer == "up_conv_shortcut" and var_name == "kernel":
           self.assertEqual(v.shape.as_list()[:2], [1, 1], msg=str(v))
-      g_num_weights = sum([v.get_shape().num_elements() for v in g_vars])
+      g_num_weights = sum(v.get_shape().num_elements() for v in g_vars)
       self.assertEqual(g_num_weights, 70433988)
 
       for v in d_vars:
@@ -150,7 +145,7 @@ class ResNet5BigGanTest(tf.test.TestCase):
         # no Shortcut in last block.
         if parts[-3] == "B6":
           self.assertNotEqual(layer, "same_shortcut", msg=str(v))
-      d_num_weights = sum([v.get_shape().num_elements() for v in d_vars])
+      d_num_weights = sum(v.get_shape().num_elements() for v in d_vars)
       self.assertEqual(d_num_weights, 87982370)
 
   def testInitializers(self):
@@ -183,7 +178,7 @@ class ResNet5BigGanTest(tf.test.TestCase):
         elif var_name == "bias":
           self.assertEqual(initializer_name, "zeros")
         else:
-          self.fail("Unknown variables {}".format(v))
+          self.fail(f"Unknown variables {v}")
 
 
 if __name__ == "__main__":

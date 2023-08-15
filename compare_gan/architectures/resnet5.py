@@ -70,18 +70,18 @@ class Generator(resnet_ops.ResNetGenerator):
 
     up_layers = np.log2(float(image_size) / seed_size)
     if not up_layers.is_integer():
-      raise ValueError("log2({}/{}) must be an integer.".format(
-          image_size, seed_size))
+      raise ValueError(f"log2({image_size}/{seed_size}) must be an integer.")
     if up_layers < 0 or up_layers > 5:
-      raise ValueError("Invalid image_size {}.".format(image_size))
+      raise ValueError(f"Invalid image_size {image_size}.")
     up_layers = int(up_layers)
 
     for block_idx in range(5):
       block = self._resnet_block(
-          name="B{}".format(block_idx + 1),
+          name=f"B{block_idx + 1}",
           in_channels=self._ch * self._channels[block_idx],
           out_channels=self._ch * self._channels[block_idx + 1],
-          scale="up" if block_idx < up_layers else "none")
+          scale="up" if block_idx < up_layers else "none",
+      )
       net = block(net, z=z, y=y, is_training=is_training)
 
     net = self.batch_norm(
@@ -119,8 +119,7 @@ class Discriminator(resnet_ops.ResNetDiscriminator):
     resnet_ops.validate_image_inputs(x)
     colors = x.shape[3].value
     if colors not in [1, 3]:
-      raise ValueError("Number of color channels not supported: {}".format(
-          colors))
+      raise ValueError(f"Number of color channels not supported: {colors}")
 
     block = self._resnet_block(
         name="B0",
@@ -131,10 +130,11 @@ class Discriminator(resnet_ops.ResNetDiscriminator):
 
     for block_idx in range(5):
       block = self._resnet_block(
-          name="B{}".format(block_idx + 1),
+          name=f"B{block_idx + 1}",
           in_channels=self._ch * self._channels[block_idx],
           out_channels=self._ch * self._channels[block_idx + 1],
-          scale="down")
+          scale="down",
+      )
       output = block(output, z=None, y=y, is_training=is_training)
 
     output = tf.nn.relu(output)

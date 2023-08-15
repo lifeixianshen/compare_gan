@@ -42,8 +42,8 @@ def cross_replica_concat(value, replica_id, num_replicas):
     ValueError: If `value` is a scalar.
   """
   if value.shape.ndims < 1:
-    raise ValueError("Value must have at least rank 1 but got {}.".format(
-        value.shape.ndims))
+    raise ValueError(
+        f"Value must have at least rank 1 but got {value.shape.ndims}.")
   if num_replicas <= 1:
     return value
   with tf.name_scope(None, "tpu_cross_replica_concat"):

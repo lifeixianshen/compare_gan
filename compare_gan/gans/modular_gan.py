@@ -132,8 +132,8 @@ class ModularGAN(AbstractGAN):
 
     if conditional and not self._dataset.num_classes:
       raise ValueError(
-          "Option 'conditional' selected but dataset {} does not have "
-          "labels".format(self._dataset.name))
+          f"Option 'conditional' selected but dataset {self._dataset.name} does not have labels"
+      )
     self._conditional = conditional
     self._fit_label_distribution = fit_label_distribution
 
@@ -158,9 +158,7 @@ class ModularGAN(AbstractGAN):
     self._generator = None
 
   def _get_num_sub_steps(self, unroll_graph):
-    if unroll_graph:
-      return self._disc_iters + 1
-    return 1
+    return self._disc_iters + 1 if unroll_graph else 1
 
   @property
   def conditional(self):
@@ -183,8 +181,7 @@ class ModularGAN(AbstractGAN):
       }
       if self._architecture not in architecture_fns:
         raise NotImplementedError(
-            "Generator architecture {} not implemented.".format(
-                self._architecture))
+            f"Generator architecture {self._architecture} not implemented.")
       self._generator = architecture_fns[self._architecture](
           image_shape=self._dataset.image_shape)
     return self._generator
@@ -207,8 +204,7 @@ class ModularGAN(AbstractGAN):
       }
       if self._architecture not in architecture_fns:
         raise NotImplementedError(
-            "Discriminator architecture {} not implemented.".format(
-                self._architecture))
+            f"Discriminator architecture {self._architecture} not implemented.")
       self._discriminator = architecture_fns[self._architecture]()
     return self._discriminator
 
@@ -298,7 +294,7 @@ class ModularGAN(AbstractGAN):
     tags_and_args = [
         (set(), {"model": "gen", "batch_size": default_batch_size})]
     for model, bs in itertools.product(models, batch_sizes):
-      tags = {model, "bs{}".format(bs)}
+      tags = {model, f"bs{bs}"}
       args = {"model": model, "batch_size": bs}
       tags_and_args.append((tags, args))
     return hub.create_module_spec(
@@ -309,8 +305,8 @@ class ModularGAN(AbstractGAN):
     """Returns the shape for a rectangle grid with `num_summarry_images`."""
     if num_summary_images & (num_summary_images - 1) != 0:
       raise ValueError(
-          "Number of summary images must be a power of 2 to create a grid of "
-          "images but was {}.".format(num_summary_images))
+          f"Number of summary images must be a power of 2 to create a grid of images but was {num_summary_images}."
+      )
     # Since b = 2^c we can use x = 2^(floor(c/2)) and y = 2^(ceil(c/2)).
     x = 2 ** int(np.log2(num_summary_images) / 2)
     y = num_summary_images // x
@@ -347,14 +343,12 @@ class ModularGAN(AbstractGAN):
     t_vars = tf.trainable_variables()
     g_vars = self.generator.trainable_variables
     d_vars = self.discriminator.trainable_variables
-    shared_vars = set(d_vars) & set(g_vars)
-    if shared_vars:
+    if shared_vars := set(d_vars) & set(g_vars):
       logging.info("g_vars: %s", g_vars)
       logging.info("d_vars: %s", d_vars)
-      raise ValueError("Shared trainable variables: %s" % shared_vars)
-    unused_vars = set(t_vars) - set(d_vars) - set(g_vars)
-    if unused_vars:
-      raise ValueError("Unused trainable variables: %s" % unused_vars)
+      raise ValueError(f"Shared trainable variables: {shared_vars}")
+    if unused_vars := set(t_vars) - set(d_vars) - set(g_vars):
+      raise ValueError(f"Unused trainable variables: {unused_vars}")
 
   def _get_one_hot_labels(self, labels):
     if not self.conditional:
@@ -574,7 +568,7 @@ class ModularGAN(AbstractGAN):
     d_losses = []
     d_steps = self._disc_iters if unroll_graph else 1
     for i in range(d_steps):
-      with tf.name_scope("disc_step_{}".format(i + 1)):
+      with tf.name_scope(f"disc_step_{i + 1}"):
         with tf.control_dependencies(d_losses):
           d_losses.append(train_disc_fn(features=fs[i], labels=ls[i]))
 
@@ -584,7 +578,7 @@ class ModularGAN(AbstractGAN):
         g_loss = train_gen_fn()
 
     for i, d_loss in enumerate(d_losses):
-      self._tpu_summary.scalar("loss/d_{}".format(i), d_loss)
+      self._tpu_summary.scalar(f"loss/d_{i}", d_loss)
     self._tpu_summary.scalar("loss/g", g_loss)
     self._add_images_to_summary(fs[0]["generated"], "fake_images", params)
     self._add_images_to_summary(fs[0]["images"], "real_images", params)

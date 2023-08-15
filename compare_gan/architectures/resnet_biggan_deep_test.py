@@ -53,10 +53,10 @@ class ResNet5BigGanDeepTest(tf.test.TestCase):
         logging.info("\n%s", "\n".join(g_param_overview[i:i + 80]))
       logging.info("Discriminator variables:\n%s", d_param_overview)
 
-      g_num_weights = sum([v.get_shape().num_elements() for v in g_vars])
+      g_num_weights = sum(v.get_shape().num_elements() for v in g_vars)
       self.assertEqual(g_num_weights, 50244484)
 
-      d_num_weights = sum([v.get_shape().num_elements() for v in d_vars])
+      d_num_weights = sum(v.get_shape().num_elements() for v in d_vars)
       self.assertEqual(d_num_weights, 34590210)
 
 

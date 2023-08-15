@@ -60,7 +60,7 @@ def weight_initializer(initializer=consts.NORMAL_INIT, stddev=0.02):
     return tf.initializers.truncated_normal(stddev=stddev)
   if initializer == consts.ORTHOGONAL_INIT:
     return tf.initializers.orthogonal()
-  raise ValueError("Unknown weight initializer {}.".format(initializer))
+  raise ValueError(f"Unknown weight initializer {initializer}.")
 
 
 def _moving_moments_for_inference(mean, variance, is_training, decay):
@@ -253,8 +253,7 @@ def standardize_batch(inputs,
     The normalized tensor with the same type and shape as `inputs`.
   """
   if data_format not in {"NCHW", "NHWC"}:
-    raise ValueError(
-        "Invalid data_format {}. Allowed: NCHW, NHWC.".format(data_format))
+    raise ValueError(f"Invalid data_format {data_format}. Allowed: NCHW, NHWC.")
   if use_cross_replica_mean is None:
     # Default to global batch norm only on TPUs.
     use_cross_replica_mean = (
@@ -272,7 +271,7 @@ def standardize_batch(inputs,
 
   inputs_rank = inputs_shape.ndims
   if inputs_rank is None:
-    raise ValueError("Inputs %s has undefined rank" % inputs.name)
+    raise ValueError(f"Inputs {inputs.name} has undefined rank")
   elif inputs_rank not in [2, 4]:
     raise ValueError(
         "Inputs %s has unsupported rank."
@@ -530,9 +529,7 @@ def spectral_norm(inputs, epsilon=1e-12, singular_value="left"):
 
   w_normalized = w / norm_value
 
-  # Deflate normalized weights to match the unnormalized tensor.
-  w_tensor_normalized = tf.reshape(w_normalized, inputs.shape)
-  return w_tensor_normalized
+  return tf.reshape(w_normalized, inputs.shape)
 
 
 def linear(inputs, output_size, scope=None, stddev=0.02, bias_start=0.0,
@@ -662,9 +659,8 @@ def weight_norm_conv2d(input_, output_dim,
       tf.assert_variables_initialized([v, g, b])
       w = tf.reshape(g, [1, 1, 1, output_dim]) * tf.nn.l2_normalize(
           v, [0, 1, 2])
-      x = tf.nn.bias_add(
+      return tf.nn.bias_add(
           tf.nn.conv2d(input_, w, [1, d_h, d_w, 1], padding="SAME"), b)
-      return x
 
 
 def weight_norm_deconv2d(x, output_dim,

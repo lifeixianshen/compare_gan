@@ -165,8 +165,8 @@ class ModularGanTest(parameterized.TestCase, test_utils.CompareGanTestCase):
     gen_step_values = []
 
     for step in range(4):
-      basename = os.path.join(self.model_dir, "model.ckpt-{}".format(step))
-      self.assertTrue(tf.gfile.Exists(basename + ".index"))
+      basename = os.path.join(self.model_dir, f"model.ckpt-{step}")
+      self.assertTrue(tf.gfile.Exists(f"{basename}.index"))
       ckpt = tf.train.load_checkpoint(basename)
 
       disc_step_values.append(ckpt.get_tensor("global_step_disc"))

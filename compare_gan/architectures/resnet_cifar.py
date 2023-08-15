@@ -91,11 +91,10 @@ class Generator(resnet_ops.ResNetGenerator):
                         use_sn=self._spectral_norm)
     output = tf.reshape(output, [-1, 4, 4, 256], name="fc_reshaped")
     for block_idx in range(3):
-      block = self._resnet_block(
-          name="B{}".format(block_idx + 1),
-          in_channels=256,
-          out_channels=256,
-          scale="up")
+      block = self._resnet_block(name=f"B{block_idx + 1}",
+                                 in_channels=256,
+                                 out_channels=256,
+                                 scale="up")
       output = block(
           output,
           z=z_per_block[block_idx],
@@ -138,16 +137,16 @@ class Discriminator(resnet_ops.ResNetDiscriminator):
     resnet_ops.validate_image_inputs(x)
     colors = x.shape[3].value
     if colors not in [1, 3]:
-      raise ValueError("Number of color channels not supported: {}".format(
-          colors))
+      raise ValueError(f"Number of color channels not supported: {colors}")
 
     output = x
     for block_idx in range(4):
       block = self._resnet_block(
-          name="B{}".format(block_idx + 1),
+          name=f"B{block_idx + 1}",
           in_channels=colors if block_idx == 0 else 128,
           out_channels=128,
-          scale="down" if block_idx <= 1 else "none")
+          scale="down" if block_idx <= 1 else "none",
+      )
       output = block(output, z=None, y=y, is_training=is_training)
 
     # Final part - ReLU

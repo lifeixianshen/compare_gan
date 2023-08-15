@@ -54,7 +54,7 @@ class Generator(resnet_ops.ResNetGenerator):
     """
     z_shape = z.get_shape().as_list()
     if len(z_shape) != 2:
-      raise ValueError("Expected shape [batch_size, z_dim], got %s." % z_shape)
+      raise ValueError(f"Expected shape [batch_size, z_dim], got {z_shape}.")
     ch = 64
     colors = self._image_shape[2]
     # Map noise to the actual seed.
@@ -66,18 +66,20 @@ class Generator(resnet_ops.ResNetGenerator):
     for superblock in range(6):
       for i in range(5):
         block = self._resnet_block(
-            name="B_{}_{}".format(superblock, i),
+            name=f"B_{superblock}_{i}",
             in_channels=in_channels,
             out_channels=in_channels,
-            scale="none")
+            scale="none",
+        )
         output = block(output, z=z, y=y, is_training=is_training)
       # We want to upscale 5 times.
       if superblock < 5:
         block = self._resnet_block(
-            name="B_{}_up".format(superblock),
+            name=f"B_{superblock}_up",
             in_channels=in_channels,
             out_channels=out_channels,
-            scale="up")
+            scale="up",
+        )
         output = block(output, z=z, y=y, is_training=is_training)
       in_channels /= 2
       out_channels /= 2
@@ -119,18 +121,20 @@ class Discriminator(resnet_ops.ResNetDiscriminator):
     for superblock in range(6):
       for i in range(5):
         block = self._resnet_block(
-            name="B_{}_{}".format(superblock, i),
+            name=f"B_{superblock}_{i}",
             in_channels=in_channels,
             out_channels=in_channels,
-            scale="none")
+            scale="none",
+        )
         output = block(output, z=None, y=y, is_training=is_training)
       # We want to downscale 5 times.
       if superblock < 5:
         block = self._resnet_block(
-            name="B_{}_up".format(superblock),
+            name=f"B_{superblock}_up",
             in_channels=in_channels,
             out_channels=out_channels,
-            scale="down")
+            scale="down",
+        )
         output = block(output, z=None, y=y, is_training=is_training)
       in_channels *= 2
       out_channels *= 2
